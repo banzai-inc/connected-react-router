@@ -1,12 +1,12 @@
 {
-  "name": "connected-react-router",
+  "name": "@banzai-inc/connected-react-router",
   "version": "6.8.0",
   "description": "A Redux binding for React Router v4 and v5",
   "main": "lib/index.js",
   "module": "esm/index.js",
   "types": "./index.d.ts",
   "sideEffects": false,
-  "author": "Supasate Choochaisri",
+  "author": "Banzai Inc.",
   "license": "MIT",
   "files": [
     "*.md",
@@ -85,9 +85,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/supasate/connected-react-router.git"
+    "url": "https://github.com/banzai-inc/connected-react-router.git"
   },
   "bugs": {
-    "url": "https://github.com/supasate/connected-react-router/issues"
+    "url": "https://github.com/banzai-inc/connected-react-router/issues"
   }
 }
