@@ -5,6 +5,17 @@ import Immutable from 'immutable'
 import { LOCATION_CHANGE, connectRouter } from '../src'
 import { connectRouter as connectRouterImmutable } from '../src/immutable'
 import { connectRouter as connectRouterSeamlessImmutable } from '../src/seamless-immutable'
+import m from "mori"
+import { connectRouter as connectRouterMori } from '../src/mori'
+
+const combineReducersMori = reducers => {
+  return (state = m.hashMap(), action) => {
+    return m.reduce((nextState, k) => {
+      const v = m.get(state, k)
+      return m.assoc(nextState, k, m.get(reducers, k)(v, action) || v)
+    }, m.hashMap(), m.keys(reducers))
+  }
+}
 
 describe('connectRouter', () => {
   let mockHistory
@@ -331,4 +342,86 @@ describe('connectRouter', () => {
       expect(nextState).toBe(currentState)
     })
   })
+
+  describe('with mori structure', () => {
+    it('creates new root reducer with router reducer inside', () => {
+      const mockReducer = (state = m.hashMap(), action) => {
+        switch (action.type) {
+          default:
+            return state
+        }
+      }
+      const rootReducer = combineReducersMori(m.hashMap(
+        "mock", mockReducer,
+        "router", connectRouterMori(mockHistory)
+      ))
+      const currentState = m.toClj({
+        mock: {},
+        router: {
+          location: {
+            pathname: '/',
+            search: '',
+            hash: '',
+          },
+          action: 'POP',
+        },
+      })
+      const action = {
+        type: LOCATION_CHANGE,
+        payload: {
+          location: {
+            pathname: '/path/to/somewhere',
+            search: '?query=test',
+            hash: '',
+          },
+          action: 'PUSH',
+        }
+      }
+      const nextState = rootReducer(currentState, action)
+      const expectedState = m.toClj({
+        mock: {},
+        router: {
+          location: {
+            pathname: '/path/to/somewhere',
+            search: '?query=test',
+            hash: '',
+            query: { query: 'test' }
+          },
+          action: 'PUSH',
+        },
+      })
+      expect(m.equals(nextState, expectedState))
+    })
+
+    it('does not change state ref when receiving LOCATION_CHANGE for the first rendering', () => {
+      const rootReducer = combineReducersMori(m.hashMap(
+        "router", connectRouterMori(mockHistory)
+      ))
+      const currentState = m.toClj({
+        router: {
+          location: {
+            pathname: '/',
+            search: '',
+            hash: '',
+          },
+          action: 'POP',
+        },
+      })
+      const action = {
+        type: LOCATION_CHANGE,
+        payload: {
+          location: {
+            pathname: '/',
+            search: '',
+            hash: '',
+          },
+          action: 'POP',
+          isFirstRendering: true,
+        }
+      }
+      const nextState = rootReducer(currentState, action)
+      expect(m.equals(nextState, currentState))
+    })
+  })
 })
+
