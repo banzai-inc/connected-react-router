@@ -2,7 +2,7 @@ import m from "mori"
 
 export default {
   fromJS: m.toClj,
-  getIn: m.getIn,
+  getIn: (value, path) => m.getIn(m.toClj(value), path),
   merge: (state, payload) => m.merge(state, m.hashMap(
     "location", payload.location,
     "action", payload.action
